@@ -1,3 +1,4 @@
+import { StepDoneButton, StepMarker } from "@/components/mdx/step-marker";
 import { slugify } from "@/lib/slugify";
 
 // Numbering comes from a CSS counter on the container (see `.steps` in
@@ -17,10 +18,12 @@ export function Step({
 
   return (
     <section className="step" aria-labelledby={id}>
-      <h3 id={id} data-toc-title={title} className="step-title scroll-mt-24">
+      <StepMarker id={id} title={title} />
+      <h3 id={id} className="step-title scroll-mt-24">
         {title}
       </h3>
       <div className="step-body">{children}</div>
+      <StepDoneButton id={id} />
     </section>
   );
 }

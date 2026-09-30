@@ -4,21 +4,13 @@ export const metadata = {
     "A beginner-friendly walkthrough of Keploy's Gin + MongoDB quickstart: record real API traffic, turn it into tests and mocks, and catch regressions.",
 };
 
-<div className="not-prose mb-5 flex flex-wrap gap-2">
-  <Badge variant="secondary">Beginner</Badge>
-  <Badge variant="outline">Go · Gin</Badge>
-  <Badge variant="outline">MongoDB</Badge>
-  <Badge variant="outline">Linux / WSL</Badge>
-  <Badge variant="outline">Keploy 3.6.82</Badge>
-</div>
-
-# Record, Replay, Relax: API Testing a Go App with Keploy
+<Hero />
 
 You have a Go API. It works. You *should* have tests for it, but writing them by hand means crafting request payloads, asserting on responses, and mocking out the database, which is often more code than the handlers themselves.
 
 In this tutorial you'll let **Keploy** write those tests for you. You'll run a small Gin + MongoDB app, use it like a normal user for a minute, and walk away with a replayable test suite that doesn't even need the database to run.
 
-<OnThisPage />
+<QuickLoop />
 
 <Callout type="info" title="What you'll learn">
 
@@ -34,7 +26,7 @@ In this tutorial you'll let **Keploy** write those tests for you. You'll run a s
 Keploy is an open-source testing tool that **generates API tests from real traffic**. Instead of writing a test, you *use* your API while Keploy watches. It saves two things:
 
 - **Test cases:** each request that hit your app, plus the response your app sent back.
-- **Mocks:** each call your app made to its dependencies (here, MongoDB) and what came back.
+- **<Term title="Mock" tip="A saved copy of a conversation with a dependency (here, MongoDB). During replay Keploy plays the database's side back from the recording, so the real database isn't needed.">Mocks</Term>:** each call your app made to its dependencies (here, MongoDB) and what came back.
 
 Later, Keploy replays those requests against your app and answers the database calls itself using the saved mocks. If your app's response still matches what was recorded, the test passes. If something changed, you get a diff.
 
@@ -49,7 +41,7 @@ Later, Keploy replays those requests against your app and answers the database c
 
 <Callout type="tip" title="My a-ha moment">
 
-The API returns a `ts` field, a nanosecond timestamp that's different on *every* call. I assumed that would make every replay fail until I configured something. It didn't: Keploy spotted the field while recording, marked it as noise in the test file, and ignored it on replay. More on that [below](#look-at-what-keploy-generated).
+The API returns a `ts` field, a nanosecond timestamp that's different on *every* call. I assumed that would make every replay fail until I configured something. It didn't: Keploy spotted the field while recording, marked it as <Term title="Noise" tip="Fields that legitimately change on every run, like timestamps or generated IDs. Keploy leaves them out when comparing a replayed response with the recorded one.">noise</Term> in the test file, and ignored it on replay. More on that [below](#look-at-what-keploy-generated).
 
 </Callout>
 
@@ -239,7 +231,7 @@ The open-source binary prints a banner listing MongoDB among the extras of Keplo
 
 <Callout type="warning" title="Keploy needs root, and sudo forgets your PATH">
 
-Keploy uses eBPF to watch network traffic, which requires root. But `sudo keploy` fails to find `keploy` (and `go`), because `sudo` swaps in a minimal `PATH`. The fix, which is also what Keploy's install script sets up as an alias, is to carry your `PATH` through:
+Keploy uses <Term title="eBPF" tip="A Linux kernel feature that lets tools safely observe things like network calls from inside the kernel, without changing the application. It's why Keploy needs Linux (or WSL) and root.">eBPF</Term> to watch network traffic, which requires root. But `sudo keploy` fails to find `keploy` (and `go`), because `sudo` swaps in a minimal `PATH`. The fix, which is also what Keploy's install script sets up as an alias, is to carry your `PATH` through:
 
 ```bash
 sudo -E env PATH="$PATH" keploy --version
@@ -536,3 +528,5 @@ This is the payoff: you never wrote an assertion, yet Keploy caught a renamed JS
 - A changed response shows up as a failing test with a clear expected-vs-actual diff, and you never wrote an assertion.
 
 That's the loop: **record once, replay on every change, re-record when the behaviour is meant to change.**
+
+<AuthorCard />

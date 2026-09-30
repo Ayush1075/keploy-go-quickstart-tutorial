@@ -12,6 +12,7 @@
   --font-mono: var(--font-geist-mono);
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-brand-ink: var(--brand-ink);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -39,52 +40,55 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.2 0.005 260);
+  --background: oklch(0.995 0.001 60);
+  --foreground: oklch(0.2 0.01 260);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.005 260);
+  --card-foreground: oklch(0.2 0.01 260);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.005 260);
-  --primary: oklch(0.21 0.006 260);
+  --popover-foreground: oklch(0.2 0.01 260);
+  --primary: oklch(0.21 0.01 260);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.002 260);
-  --secondary-foreground: oklch(0.21 0.006 260);
-  --muted: oklch(0.967 0.002 260);
-  --muted-foreground: oklch(0.5 0.01 260);
-  --accent: oklch(0.955 0.003 260);
-  --accent-foreground: oklch(0.21 0.006 260);
+  --secondary: oklch(0.967 0.003 260);
+  --secondary-foreground: oklch(0.21 0.01 260);
+  --muted: oklch(0.965 0.003 260);
+  --muted-foreground: oklch(0.5 0.012 260);
+  --accent: oklch(0.955 0.004 260);
+  --accent-foreground: oklch(0.21 0.01 260);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.915 0.004 260);
-  --input: oklch(0.915 0.004 260);
-  --ring: oklch(0.62 0.18 45);
-  /* Keploy-ish orange, used sparingly: links, active TOC item, diagram. */
-  --brand: oklch(0.6 0.19 42);
-  --brand-foreground: oklch(0.99 0 0);
-  --code-bg: oklch(0.982 0.002 260);
+  --border: oklch(0.915 0.005 260);
+  --input: oklch(0.915 0.005 260);
+  --ring: oklch(0.72 0.16 50);
+  /* Keploy's brand orange (#ff914d) for fills and highlights ... */
+  --brand: #ff914d;
+  --brand-foreground: oklch(0.2 0.03 50);
+  /* ... and a deeper shade that passes WCAG AA as text on white. */
+  --brand-ink: oklch(0.55 0.17 42);
+  --code-bg: oklch(0.985 0.002 260);
 }
 
 .dark {
-  --background: oklch(0.16 0.005 260);
-  --foreground: oklch(0.94 0.003 260);
-  --card: oklch(0.2 0.006 260);
-  --card-foreground: oklch(0.94 0.003 260);
-  --popover: oklch(0.2 0.006 260);
-  --popover-foreground: oklch(0.94 0.003 260);
-  --primary: oklch(0.92 0.003 260);
-  --primary-foreground: oklch(0.2 0.006 260);
-  --secondary: oklch(0.25 0.006 260);
-  --secondary-foreground: oklch(0.94 0.003 260);
-  --muted: oklch(0.24 0.006 260);
-  --muted-foreground: oklch(0.7 0.01 260);
-  --accent: oklch(0.26 0.006 260);
-  --accent-foreground: oklch(0.94 0.003 260);
+  --background: oklch(0.155 0.008 265);
+  --foreground: oklch(0.945 0.004 260);
+  --card: oklch(0.19 0.009 265);
+  --card-foreground: oklch(0.945 0.004 260);
+  --popover: oklch(0.2 0.009 265);
+  --popover-foreground: oklch(0.945 0.004 260);
+  --primary: oklch(0.93 0.004 260);
+  --primary-foreground: oklch(0.2 0.009 265);
+  --secondary: oklch(0.24 0.009 265);
+  --secondary-foreground: oklch(0.945 0.004 260);
+  --muted: oklch(0.235 0.009 265);
+  --muted-foreground: oklch(0.7 0.012 260);
+  --accent: oklch(0.255 0.01 265);
+  --accent-foreground: oklch(0.945 0.004 260);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.72 0.16 50);
-  --brand: oklch(0.74 0.16 52);
-  --brand-foreground: oklch(0.18 0.01 50);
-  --code-bg: oklch(0.19 0.006 260);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.75 0.15 52);
+  --brand: #ff914d;
+  --brand-foreground: oklch(0.2 0.03 50);
+  --brand-ink: oklch(0.78 0.14 55);
+  --code-bg: oklch(0.175 0.009 265);
 }
 
 @layer base {
@@ -92,7 +96,7 @@
     @apply border-border outline-ring/50;
   }
   html {
-    scroll-padding-top: 5rem;
+    scroll-padding-top: 5.5rem;
   }
   @media (prefers-reduced-motion: no-preference) {
     html {
@@ -102,10 +106,23 @@
   body {
     @apply bg-background text-foreground;
   }
+  ::selection {
+    @apply bg-brand/30;
+  }
 }
 
 @utility link {
-  @apply font-medium text-brand underline decoration-brand/40 underline-offset-4 transition-colors hover:decoration-brand;
+  @apply font-medium text-brand-ink underline decoration-brand/40 underline-offset-4 transition-colors hover:decoration-brand;
+}
+
+/* Soft grid + brand glow behind the hero, fading out downwards. */
+.hero-backdrop {
+  background-image:
+    radial-gradient(60% 55% at 50% 0%, color-mix(in oklab, var(--brand) 16%, transparent), transparent 70%),
+    linear-gradient(to right, color-mix(in oklab, var(--foreground) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 5%, transparent) 1px, transparent 1px);
+  background-size: auto, 44px 44px, 44px 44px;
+  mask-image: linear-gradient(to bottom, black 30%, transparent);
 }
 
 @layer components {
@@ -115,11 +132,13 @@
   .docs {
     @apply text-[16.5px] leading-7;
   }
-  .docs :where(h1):not(:where(.not-prose *)) {
-    @apply mb-4 text-4xl font-bold tracking-tight text-balance sm:text-[2.6rem] sm:leading-[1.15];
-  }
   .docs :where(h2):not(:where(.not-prose *)) {
-    @apply mt-16 mb-4 border-t pt-10 text-[1.7rem] leading-tight font-semibold tracking-tight;
+    @apply mt-20 mb-5 text-[1.75rem] leading-tight font-semibold tracking-tight;
+  }
+  /* A short brand-coloured rule above each section heading. */
+  .docs :where(h2):not(:where(.not-prose *))::before {
+    content: "";
+    @apply mb-5 block h-1 w-10 rounded-full bg-brand;
   }
   .docs :where(h3):not(:where(.not-prose *, .step-title)) {
     @apply mt-10 mb-3 text-xl font-semibold tracking-tight;
@@ -140,7 +159,7 @@
     @apply my-4 pl-6;
   }
   .docs :where(ul):not(:where(.not-prose *)) {
-    @apply list-disc marker:text-muted-foreground;
+    @apply list-disc marker:text-brand;
   }
   .docs :where(ol):not(:where(.not-prose *)) {
     @apply list-decimal marker:text-muted-foreground;
@@ -148,50 +167,41 @@
   .docs :where(li):not(:where(.not-prose *)) {
     @apply my-1.5 pl-1;
   }
-  .docs :where(blockquote):not(:where(.not-prose *)) {
-    @apply my-6 border-l-2 border-brand/60 pl-4 text-muted-foreground italic;
-  }
   .docs :where(hr):not(:where(.not-prose *)) {
     @apply my-12;
   }
-  .docs :where(table):not(:where(.not-prose *)) {
-    @apply my-6 block w-full overflow-x-auto border-collapse text-sm;
+  .docs :where(kbd) {
+    @apply rounded-md border border-b-2 bg-muted px-1.5 py-px font-mono text-[0.8em];
+  }
+
+  /* Tables sit in a rounded frame (see mdx-components.tsx). */
+  .docs .table-frame table {
+    @apply w-full border-separate border-spacing-0 text-sm;
   }
   .docs :where(th):not(:where(.not-prose *)) {
-    @apply border-b bg-muted/50 px-3 py-2 text-left font-semibold;
+    @apply border-b bg-muted/60 px-4 py-2.5 text-left font-semibold whitespace-nowrap;
   }
   .docs :where(td):not(:where(.not-prose *)) {
-    @apply border-b px-3 py-2 align-top;
+    @apply border-b px-4 py-2.5 align-top;
+  }
+  .docs :where(tr:last-child td):not(:where(.not-prose *)) {
+    @apply border-b-0;
   }
 
   /* Inline code (fenced blocks are handled by rehype-pretty-code below). */
   .docs :where(:not(pre) > code):not(:where(.not-prose *)) {
-    @apply rounded-[5px] border bg-muted px-[0.35em] py-[0.1em] font-mono text-[0.86em] break-words;
+    @apply rounded-md border bg-muted/70 px-[0.35em] py-[0.1em] font-mono text-[0.85em] break-words;
+  }
+  .docs [data-slot="accordion-content"] code {
+    @apply rounded-md border bg-muted px-[0.35em] py-[0.1em] font-mono text-[0.86em];
   }
 
   /* ---------- Code blocks (rehype-pretty-code + Shiki) ---------- */
-  .docs [data-rehype-pretty-code-figure] {
-    @apply my-5;
-  }
-  .docs [data-rehype-pretty-code-title] {
-    @apply rounded-t-lg border border-b-0 bg-muted/60 px-4 py-2 font-mono text-xs text-muted-foreground;
-  }
-  .docs [data-code-block][data-labelled] pre {
-    @apply pt-9;
-  }
-  /* A filename title already says what the block is, so drop the label. */
-  .docs [data-rehype-pretty-code-title] + [data-code-block] pre {
-    @apply rounded-t-none pt-4;
-  }
-  .docs [data-rehype-pretty-code-title] + [data-code-block] [data-code-label] {
-    @apply hidden;
-  }
-  /* Accordions opt out of prose styles but still contain inline code. */
-  .docs [data-slot="accordion-content"] code {
-    @apply rounded-[5px] border bg-muted px-[0.35em] py-[0.1em] font-mono text-[0.86em];
-  }
   .docs [data-code-block] pre {
-    @apply overflow-x-auto rounded-lg border bg-(--code-bg) py-4 font-mono text-[13.5px] leading-6;
+    @apply overflow-x-auto py-4 font-mono text-[13.5px] leading-6;
+  }
+  .docs [data-code-block][data-kind="output"] {
+    @apply border-dashed bg-transparent shadow-none;
   }
   .docs [data-code-block] pre > code {
     @apply grid min-w-full;
@@ -210,23 +220,59 @@
     color: var(--shiki-dark);
   }
 
+  /* ---------- Callouts inside steps sit a little tighter ---------- */
+  .docs .step-body .callout {
+    @apply my-5;
+  }
+
   /* ---------- Steps ---------- */
   .steps {
     counter-reset: step;
-    @apply ml-4 border-l pl-8;
+    @apply ml-4 border-l border-dashed pl-8;
   }
   .step {
     counter-increment: step;
-    @apply relative pb-4;
+    @apply relative pb-8 last:pb-2;
   }
-  .step::before {
+  .step-number::before {
     content: counter(step);
-    @apply absolute top-0 -left-[calc(2rem+1rem+0.5px)] grid size-8 place-items-center rounded-full border-4 border-background bg-muted font-mono text-sm font-semibold text-foreground;
   }
   .step-title {
     @apply mt-0 mb-3 pt-0.5 text-lg font-semibold tracking-tight;
   }
   .step-body > :first-child {
     @apply mt-0;
+  }
+}
+
+/* ---------- Motion ---------- */
+@keyframes flow-packet {
+  from {
+    left: 0;
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  to {
+    left: calc(100% - 0.5rem);
+    opacity: 0;
+  }
+}
+.flow-packet {
+  animation: flow-packet 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .flow-packet {
+    display: none;
   }
 }

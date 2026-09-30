@@ -23,7 +23,7 @@ function FlowNode({ icon: Icon, title, subtitle, tone = "default" }: Node) {
       <span
         className={cn(
           "grid size-9 shrink-0 place-items-center rounded-md border bg-background",
-          tone === "keploy" && "border-brand/40 text-brand",
+          tone === "keploy" && "border-brand/40 text-brand-ink",
         )}
       >
         <Icon className="size-4" aria-hidden />
@@ -40,11 +40,15 @@ function FlowEdge({ label, artifact }: Edge) {
   return (
     <div className="flex shrink-0 items-center gap-3 py-1 pl-7 md:w-28 md:flex-col md:justify-center md:gap-1.5 md:px-0 md:py-0 md:text-center">
       <ArrowDown className="size-4 text-muted-foreground md:hidden" aria-hidden />
-      <ArrowRight className="hidden size-4 text-muted-foreground md:block" aria-hidden />
+      {/* A track with a "packet" travelling along it (paused for reduced motion). */}
+      <span aria-hidden className="relative hidden h-px w-full bg-border md:block">
+        <span className="flow-packet absolute top-1/2 left-0 size-2 -translate-y-1/2 rounded-full bg-brand shadow-[0_0_8px] shadow-brand" />
+        <ArrowRight className="absolute top-1/2 -right-1 size-3.5 -translate-y-1/2 text-muted-foreground" />
+      </span>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 md:flex-col">
         <span className="text-xs text-muted-foreground">{label}</span>
         {artifact && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-brand/40 bg-brand/[0.08] px-2 py-0.5 font-mono text-[10.5px] font-medium text-brand">
+          <span className="inline-flex items-center gap-1 rounded-full border border-brand/40 bg-brand/[0.08] px-2 py-0.5 font-mono text-[10.5px] font-medium text-brand-ink">
             <FileCode2 className="size-3" aria-hidden />
             {artifact}
           </span>
@@ -71,7 +75,7 @@ function Notes({ items }: { items: string[] }) {
     <ol className="mt-5 grid gap-2 text-sm text-muted-foreground md:grid-cols-3">
       {items.map((item, i) => (
         <li key={item} className="flex gap-2.5 rounded-md bg-muted/50 px-3 py-2.5">
-          <span className="font-mono text-xs font-semibold text-brand">{i + 1}</span>
+          <span className="font-mono text-xs font-semibold text-brand-ink">{i + 1}</span>
           <span className="leading-snug">{item}</span>
         </li>
       ))}

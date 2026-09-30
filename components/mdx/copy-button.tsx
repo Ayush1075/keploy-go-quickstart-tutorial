@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function CopyButton({ className }: { className?: string }) {
+export function CopyButton({ text, className }: { text?: string; className?: string }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [copied, setCopied] = useState(false);
 
@@ -15,14 +15,14 @@ export function CopyButton({ className }: { className?: string }) {
   }, [copied]);
 
   async function copy() {
-    // The highlighted <pre> is server-rendered; read its text from the DOM
-    // rather than shipping the raw code a second time as a prop.
-    const pre = buttonRef.current
-      ?.closest("[data-code-block]")
-      ?.querySelector("pre");
-    if (!pre?.textContent) return;
+    // Inside a code block, the highlighted <pre> is server-rendered; read its
+    // text from the DOM rather than shipping the raw code again as a prop.
+    const value =
+      text ??
+      buttonRef.current?.closest("[data-code-block]")?.querySelector("pre")?.textContent;
+    if (!value) return;
     try {
-      await navigator.clipboard.writeText(pre.textContent.replace(/\n$/, ""));
+      await navigator.clipboard.writeText(value.replace(/\n$/, ""));
       setCopied(true);
     } catch {
       // Clipboard needs a secure context (HTTPS or localhost); fail quietly.

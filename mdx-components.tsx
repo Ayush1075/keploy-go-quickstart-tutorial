@@ -1,11 +1,14 @@
 import type { MDXComponents } from "mdx/types";
+import { AuthorCard } from "@/components/mdx/author-card";
 import { Callout } from "@/components/mdx/callout";
-import { CodeBlock } from "@/components/mdx/code-block";
+import { CodeBlock, CodeFigure } from "@/components/mdx/code-block";
 import { Heading } from "@/components/mdx/heading";
+import { Hero } from "@/components/mdx/hero";
 import { KeployFlow } from "@/components/mdx/keploy-flow";
+import { QuickLoop } from "@/components/mdx/quick-loop";
 import { Screenshot } from "@/components/mdx/screenshot";
 import { Step, Steps } from "@/components/mdx/steps";
-import { MobileTableOfContents } from "@/components/toc";
+import { Term } from "@/components/mdx/term";
 import {
   Accordion,
   AccordionContent,
@@ -22,6 +25,13 @@ const components = {
   h3: (props) => <Heading as="h3" {...props} />,
   h4: (props) => <Heading as="h4" {...props} />,
   pre: CodeBlock,
+  figure: CodeFigure,
+  // The frame scrolls sideways on small screens; the table fills its width.
+  table: (props) => (
+    <div className="table-frame my-6 overflow-x-auto rounded-xl border">
+      <table {...props} />
+    </div>
+  ),
   a: ({ href = "", ...props }) => {
     const external = href.startsWith("http");
     return (
@@ -34,12 +44,15 @@ const components = {
   },
 
   // Tutorial components
+  Hero,
+  QuickLoop,
   Callout,
   Steps,
   Step,
   Screenshot,
   KeployFlow,
-  OnThisPage: MobileTableOfContents,
+  Term,
+  AuthorCard,
 
   // shadcn/ui primitives
   Badge,

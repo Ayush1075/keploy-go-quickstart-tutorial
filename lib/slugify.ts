@@ -1,10 +1,7 @@
-// Matches rehype-slug closely enough for ids generated from JSX props
-// (e.g. <Step title="...">), which rehype-slug never sees.
+import { slug } from "github-slugger";
+
+// Same algorithm rehype-slug uses, so ids generated from JSX props
+// (e.g. <Step title="...">) and from the outline match real heading ids.
 export function slugify(text: string) {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+  return slug(text);
 }

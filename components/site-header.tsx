@@ -1,32 +1,43 @@
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ChevronRight, Rabbit } from "lucide-react";
+import { CommandMenu } from "@/components/docs/command-menu";
+import { MobileNav } from "@/components/docs/mobile-nav";
+import { ReadingProgress } from "@/components/docs/reading-progress";
 import { GitHubIcon } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/lib/site";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/65">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/75 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <div className="mx-auto flex h-16 max-w-[90rem] items-center gap-3 px-4 sm:px-6 lg:px-8">
+        <MobileNav />
+
         <a
           href="#top"
-          className="flex items-center gap-2.5 rounded-md font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+          className="flex items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
         >
           <span
             aria-hidden
-            className="grid size-7 place-items-center rounded-md bg-brand font-mono text-xs font-bold text-brand-foreground"
+            className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-brand to-orange-600 text-white shadow-sm ring-1 ring-black/5"
           >
-            K
+            <Rabbit className="size-[18px]" strokeWidth={2.25} />
           </span>
-          <span className="text-sm sm:text-base">
-            Keploy <span className="text-muted-foreground">×</span> Go
-          </span>
-          <span className="hidden rounded-full border px-2 py-0.5 text-xs font-medium text-muted-foreground sm:inline">
-            Tutorial
+          <span className="font-semibold tracking-tight">
+            Keploy <span className="font-normal text-muted-foreground">×</span> Go
           </span>
         </a>
 
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" asChild>
+        <nav aria-label="Breadcrumb" className="hidden items-center text-sm text-muted-foreground lg:flex">
+          <ChevronRight className="mx-1.5 size-3.5 opacity-50" aria-hidden />
+          <span>Quickstarts</span>
+          <ChevronRight className="mx-1.5 size-3.5 opacity-50" aria-hidden />
+          <span className="font-medium text-foreground">Gin + MongoDB</span>
+        </nav>
+
+        <div className="ml-auto flex items-center gap-1.5">
+          <CommandMenu />
+          <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
             <a href={siteConfig.keployDocs} target="_blank" rel="noreferrer">
               Keploy docs
             </a>
@@ -39,12 +50,13 @@ export function SiteHeader() {
               aria-label="Source code on GitHub"
               title="Source code on GitHub"
             >
-              <GitHubIcon className="size-4" />
+              <GitHubIcon className="size-[18px]" />
             </a>
           </Button>
           <ThemeToggle />
         </div>
       </div>
+      <ReadingProgress />
     </header>
   );
 }
