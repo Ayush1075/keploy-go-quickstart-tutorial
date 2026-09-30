@@ -17,7 +17,7 @@ export function StepMarker({ id, title }: { id: string; title: string }) {
       aria-label={`Mark "${title}" as ${done ? "not done" : "done"}`}
       title={done ? "Completed. Click to undo" : "Mark as done"}
       className={cn(
-        "step-marker absolute top-0 -left-[calc(2rem+1rem+0.5px)] grid size-8 place-items-center rounded-full border-4 border-background font-mono text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        "step-marker grid place-items-center rounded-full border-4 border-background font-mono text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:text-sm",
         done ? "bg-green-600 text-white dark:bg-green-500" : "bg-muted text-foreground hover:bg-brand/20",
       )}
     >

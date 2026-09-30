@@ -11,7 +11,8 @@ const script: Line[] = [
   { kind: "cmd", text: 'sudo -E env PATH="$PATH" keploy record -c "go run main.go handler.go"' },
   { kind: "out", text: "🐰 Keploy: INFO  Keploy agent is ready to record test cases and mocks." },
   { kind: "gap", text: "" },
-  { kind: "cmd", text: `curl -X POST localhost:8080/url -H 'content-type: application/json' -d '{"url":"https://google.com"}'` },
+  { kind: "cmd", text: "curl -X POST localhost:8080/url \\" },
+  { kind: "cmd", text: `  -H 'content-type: application/json' -d '{"url": "https://google.com"}'` },
   { kind: "out", text: '{"ts":1790781506903043746,"url":"http://localhost:8080/Lhr4BWAi"}' },
   { kind: "gap", text: "" },
   { kind: "cmd", text: 'sudo -E env PATH="$PATH" keploy test -c "go run main.go handler.go" --delay 10' },
@@ -19,8 +20,45 @@ const script: Line[] = [
   { kind: "out", text: '🐰 Keploy: INFO  result {"testcase id": "post-url-2", "passed": "true"}' },
   { kind: "out", text: '🐰 Keploy: INFO  result {"testcase id": "get-lhr4bwai-1", "passed": "true"}' },
   { kind: "out", text: '🐰 Keploy: INFO  result {"testcase id": "get-doesnotexist-1", "passed": "true"}' },
-  { kind: "ok", text: "Total tests: 4   Total test passed: 4   Total test failed: 0" },
+  { kind: "ok", text: "Total tests:        4" },
+  { kind: "ok", text: "Total test passed:  4" },
+  { kind: "ok", text: "Total test failed:  0" },
 ];
+
+type RenderedLine = { line: Line; text: string; typing: boolean };
+
+function Transcript({ lines, prompt }: { lines: RenderedLine[]; prompt: boolean }) {
+  return (
+    <>
+      {lines.map(({ line, text, typing }, i) => {
+        if (line.kind === "gap") return <div key={i} className="h-3" />;
+        // A command continued with "\" has no prompt on its second line.
+        const continued = line.kind === "cmd" && i > 0 && lines[i - 1].line.text.endsWith("\\");
+        return (
+          <div
+            key={i}
+            className={cn(
+              "break-words whitespace-pre-wrap",
+              line.kind === "out" && "text-[#8b949e]",
+              line.kind === "ok" && "font-semibold text-[#3fb950]",
+              line.kind === "ok" && lines[i - 1]?.line.kind !== "ok" && "mt-1",
+            )}
+          >
+            {line.kind === "cmd" && !continued && <span className="text-[#ff914d] select-none">$ </span>}
+            {text}
+            {typing && <span className="ml-px inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-[#c9d1d9] sm:h-4 sm:w-2" />}
+          </div>
+        );
+      })}
+      {prompt && (
+        <div>
+          <span className="text-[#ff914d]">$ </span>
+          <span className="inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse bg-[#c9d1d9] sm:h-4 sm:w-2" />
+        </div>
+      )}
+    </>
+  );
+}
 
 const OUTPUT_COST = 10; // ticks an output line "takes", so output lands with a beat
 const cost = (line: Line) => (line.kind === "cmd" ? line.text.length : OUTPUT_COST);
@@ -66,7 +104,7 @@ export function TerminalDemo() {
   }, [run]);
 
   let budget = tick;
-  const rendered: { line: Line; text: string; typing: boolean }[] = [];
+  const rendered: RenderedLine[] = [];
   for (const line of script) {
     if (budget <= 0) break;
     const c = cost(line);
@@ -106,35 +144,19 @@ export function TerminalDemo() {
           <RotateCcw className="size-3.5" aria-hidden />
         </button>
       </div>
+      {/* Both layers share one grid cell: the invisible full transcript
+          reserves the final height, so typing never pushes the page down. */}
       <div
-        className="min-h-[19.5rem] px-4 py-3.5 font-mono leading-relaxed text-[#c9d1d9] sm:min-h-[17.5rem]"
+        className="grid grid-cols-[minmax(0,1fr)] px-3.5 py-3.5 font-mono text-[11px] leading-relaxed text-[#c9d1d9] sm:px-4 sm:text-[12.5px]"
         aria-label="Terminal recording of keploy record and keploy test"
         role="img"
       >
-        {rendered.map(({ line, text, typing }, i) =>
-          line.kind === "gap" ? (
-            <div key={i} className="h-3" />
-          ) : (
-            <div
-              key={i}
-              className={cn(
-                "break-all whitespace-pre-wrap",
-                line.kind === "out" && "text-[#8b949e]",
-                line.kind === "ok" && "mt-1 font-semibold text-[#3fb950]",
-              )}
-            >
-              {line.kind === "cmd" && <span className="text-[#ff914d] select-none">$ </span>}
-              {text}
-              {typing && <span className="ml-px inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-[#c9d1d9]" />}
-            </div>
-          ),
-        )}
-        {finished && (
-          <div>
-            <span className="text-[#ff914d]">$ </span>
-            <span className="inline-block h-4 w-2 translate-y-0.5 animate-pulse bg-[#c9d1d9]" />
-          </div>
-        )}
+        <div aria-hidden className="invisible [grid-area:1/1]">
+          <Transcript lines={script.map((line) => ({ line, text: line.text, typing: false }))} prompt />
+        </div>
+        <div className="[grid-area:1/1]">
+          <Transcript lines={rendered} prompt={finished} />
+        </div>
       </div>
     </div>
   );

@@ -70,7 +70,7 @@ export function RightRail() {
                 <span className="text-xs font-medium">{label}</span>
                 <CopyButton text={command} className="size-6 border-transparent bg-transparent" />
               </div>
-              <code className="block rounded-md bg-muted px-2 py-1.5 font-mono text-[11px] leading-relaxed break-all text-muted-foreground">
+              <code className="block rounded-md bg-muted px-2 py-1.5 font-mono text-[11px] leading-relaxed break-words text-muted-foreground">
                 {command}
               </code>
             </div>

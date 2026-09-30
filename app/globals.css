@@ -130,10 +130,10 @@
      Scoped to rendered Markdown. `:where()` keeps specificity low so
      Tailwind utilities still win, and `.not-prose` opts a subtree out. */
   .docs {
-    @apply text-[16.5px] leading-7;
+    @apply text-base leading-7 sm:text-[16.5px];
   }
   .docs :where(h2):not(:where(.not-prose *)) {
-    @apply mt-20 mb-5 text-[1.75rem] leading-tight font-semibold tracking-tight;
+    @apply mt-16 mb-5 text-2xl leading-tight font-semibold tracking-tight text-balance sm:mt-20 sm:text-[1.75rem];
   }
   /* A short brand-coloured rule above each section heading. */
   .docs :where(h2):not(:where(.not-prose *))::before {
@@ -179,10 +179,10 @@
     @apply w-full border-separate border-spacing-0 text-sm;
   }
   .docs :where(th):not(:where(.not-prose *)) {
-    @apply border-b bg-muted/60 px-4 py-2.5 text-left font-semibold whitespace-nowrap;
+    @apply border-b bg-muted/60 px-3 py-2.5 text-left font-semibold whitespace-nowrap sm:px-4;
   }
   .docs :where(td):not(:where(.not-prose *)) {
-    @apply border-b px-4 py-2.5 align-top;
+    @apply min-w-28 border-b px-3 py-2.5 align-top sm:px-4;
   }
   .docs :where(tr:last-child td):not(:where(.not-prose *)) {
     @apply border-b-0;
@@ -198,7 +198,8 @@
 
   /* ---------- Code blocks (rehype-pretty-code + Shiki) ---------- */
   .docs [data-code-block] pre {
-    @apply overflow-x-auto py-4 font-mono text-[13.5px] leading-6;
+    @apply overflow-x-auto py-3.5 font-mono text-[12.5px] leading-6 sm:py-4 sm:text-[13.5px];
+    -webkit-overflow-scrolling: touch;
   }
   .docs [data-code-block][data-kind="output"] {
     @apply border-dashed bg-transparent shadow-none;
@@ -207,7 +208,7 @@
     @apply grid min-w-full;
   }
   .docs [data-code-block] [data-line] {
-    @apply px-4;
+    @apply px-3.5 sm:px-4;
   }
   .docs [data-code-block] [data-highlighted-line] {
     @apply border-l-2 border-brand bg-brand/10 pl-[14px];
@@ -225,10 +226,28 @@
     @apply my-5;
   }
 
-  /* ---------- Steps ---------- */
+  /* ---------- Steps ----------
+     --steps-pad is the gap between the dashed rail and the step content;
+     the marker is centred on the rail whatever that gap is. */
   .steps {
     counter-reset: step;
-    @apply ml-4 border-l border-dashed pl-8;
+    --steps-pad: 1.25rem;
+    --marker: 1.75rem;
+    @apply ml-3.5 border-l border-dashed sm:ml-4;
+    padding-left: var(--steps-pad);
+  }
+  @media (width >= 40rem) {
+    .steps {
+      --steps-pad: 2rem;
+      --marker: 2rem;
+    }
+  }
+  .step-marker {
+    position: absolute;
+    top: 0;
+    width: var(--marker);
+    height: var(--marker);
+    left: calc(-1 * var(--steps-pad) - var(--marker) / 2 - 0.5px);
   }
   .step {
     counter-increment: step;

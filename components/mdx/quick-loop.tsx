@@ -21,31 +21,31 @@ const loop = [
 // A one-glance summary for readers who just want the commands.
 export function QuickLoop() {
   return (
-    <section id="the-whole-loop" aria-label="The whole loop in three commands" className="not-prose my-10 scroll-mt-24">
-      <div className="mb-4 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold tracking-wide text-brand-ink uppercase">TL;DR</p>
-          <p className="mt-1 text-lg font-semibold tracking-tight">The whole loop, in three commands</p>
-        </div>
-        <p className="hidden text-sm text-muted-foreground sm:block">The rest of this page explains each one.</p>
-      </div>
-      <ol className="grid gap-3 md:grid-cols-3">
+    <section id="the-whole-loop" aria-labelledby="the-whole-loop-title" className="not-prose my-10 scroll-mt-24">
+      <p className="text-xs font-semibold tracking-wide text-brand-ink uppercase">TL;DR</p>
+      <p id="the-whole-loop-title" className="mt-1 text-lg font-semibold tracking-tight">
+        The whole loop, in three commands
+      </p>
+      <p className="mt-1 text-sm text-muted-foreground">The rest of this page explains each one.</p>
+
+      <ol className="mt-4 divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
         {loop.map((item, index) => (
-          <li
-            key={item.title}
-            className="group relative flex flex-col rounded-xl border bg-card p-4 shadow-xs transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between">
-              <span className="grid size-7 place-items-center rounded-full bg-brand/15 font-mono text-xs font-semibold text-brand-ink">
-                {index + 1}
-              </span>
-              <CopyButton text={item.command} className="size-7" />
+          <li key={item.title} className="flex gap-3 p-4 sm:gap-4 sm:p-5">
+            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand/15 font-mono text-xs font-semibold text-brand-ink">
+              {index + 1}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">
+                {item.title}
+                <span className="font-normal text-muted-foreground"> · {item.note}</span>
+              </p>
+              <div className="mt-2.5 flex items-start gap-2 rounded-lg border bg-muted/50 py-1.5 pr-1.5 pl-3">
+                <code className="min-w-0 flex-1 py-1 font-mono text-[12px] leading-relaxed break-words sm:text-[12.5px]">
+                  {item.command}
+                </code>
+                <CopyButton text={item.command} className="size-7 shrink-0 border-transparent bg-transparent" />
+              </div>
             </div>
-            <p className="mt-3 font-semibold">{item.title}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{item.note}</p>
-            <code className="mt-3 block rounded-md bg-muted px-2.5 py-2 font-mono text-[11.5px] leading-relaxed break-all">
-              {item.command}
-            </code>
           </li>
         ))}
       </ol>
