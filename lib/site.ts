@@ -5,8 +5,7 @@ export const siteConfig = {
   description:
     "A beginner-friendly walkthrough of Keploy's Gin + MongoDB quickstart: record real API traffic, turn it into tests and mocks, and catch regressions.",
   author: "Ayush",
-  // TODO: replace with the final public repository URL before deploying.
-  repo: "https://github.com/",
+  repo: "https://github.com/Ayush1075/keploy-go-quickstart-tutorial",
   keployDocs: "https://keploy.io/docs/",
   quickstart: "https://keploy.io/docs/quickstart/samples-gin/",
   samplesRepo: "https://github.com/keploy/samples-go/tree/main/gin-mongo",
