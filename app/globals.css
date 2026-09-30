@@ -176,8 +176,19 @@
   .docs [data-rehype-pretty-code-title] {
     @apply rounded-t-lg border border-b-0 bg-muted/60 px-4 py-2 font-mono text-xs text-muted-foreground;
   }
+  .docs [data-code-block][data-labelled] pre {
+    @apply pt-9;
+  }
+  /* A filename title already says what the block is, so drop the label. */
   .docs [data-rehype-pretty-code-title] + [data-code-block] pre {
-    @apply rounded-t-none;
+    @apply rounded-t-none pt-4;
+  }
+  .docs [data-rehype-pretty-code-title] + [data-code-block] [data-code-label] {
+    @apply hidden;
+  }
+  /* Accordions opt out of prose styles but still contain inline code. */
+  .docs [data-slot="accordion-content"] code {
+    @apply rounded-[5px] border bg-muted px-[0.35em] py-[0.1em] font-mono text-[0.86em];
   }
   .docs [data-code-block] pre {
     @apply overflow-x-auto rounded-lg border bg-(--code-bg) py-4 font-mono text-[13.5px] leading-6;

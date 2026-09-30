@@ -1,5 +1,4 @@
 import { CopyButton } from "@/components/mdx/copy-button";
-import { cn } from "@/lib/utils";
 
 const languageLabels: Record<string, string> = {
   bash: "Terminal",
@@ -24,13 +23,16 @@ export function CodeBlock({
   const label = language ? (languageLabels[language] ?? language) : undefined;
 
   return (
-    <div data-code-block className="group relative">
+    <div data-code-block data-labelled={label ? "" : undefined} className="group relative">
       {label && (
-        <span className="pointer-events-none absolute top-2.5 left-4 font-mono text-[11px] font-medium tracking-wide text-muted-foreground uppercase select-none">
+        <span
+          data-code-label
+          className="pointer-events-none absolute top-2.5 left-4 font-mono text-[11px] font-medium tracking-wide text-muted-foreground uppercase select-none"
+        >
           {label}
         </span>
       )}
-      <pre className={cn(label && "pt-9", className)} {...props}>
+      <pre className={className} {...props}>
         {children}
       </pre>
       <CopyButton className="absolute top-1.5 right-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100" />
