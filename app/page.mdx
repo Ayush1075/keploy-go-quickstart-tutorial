@@ -261,7 +261,16 @@ sudo -E env PATH="$PATH" keploy record -c "go run main.go handler.go"
 
 **Why:** `-c` is the command Keploy uses to start your app. Keploy launches it and hooks into its network traffic, so you don't touch the app's code. On the first run it also creates a `keploy.yml` config file next to your code.
 
-<Todo>Screenshot: the Keploy record terminal after startup (banner + "recording" lines).</Todo>
+When you see the agent is ready and Gin has printed its routes, Keploy is recording:
+
+```text
+🐰 Keploy: ... INFO    Keploy agent is ready to record test cases and mocks.
+🐰 Keploy: ... INFO    Starting Application :  {"executing_cmd": "/usr/bin/sh -c go run main.go handler.go"}
+[GIN-debug] GET    /:param                   --> main.getURL (3 handlers)
+[GIN-debug] POST   /url                      --> main.putURL (3 handlers)
+[GIN-debug] GET    /verify-email             --> main.verifyEmail (3 handlers)
+🐰 Keploy(agent): ... INFO    Started ingress forwarding      {"orig_port": 8080, "new_port": 43463}
+```
 
 </Step>
 
@@ -388,7 +397,13 @@ sudo -E env PATH="$PATH" keploy test -c "go run main.go handler.go" --delay 10
 
 All four pass, even though the `ts` value in every response was different from the recording.
 
-<Todo>Screenshot: the passing test summary in your terminal.</Todo>
+<Screenshot
+  src="/screenshots/replay-pass.png"
+  alt="Terminal output of keploy test: test-set-0 with 4 total tests, 4 passed, 0 failed, followed by Keploy shutting down its agent."
+  caption="A clean replay: all four recorded tests pass."
+  width={1091}
+  height={666}
+/>
 
 <Callout type="success" title="Checkpoint: turn the database off">
 
@@ -432,7 +447,21 @@ EXPECT BODY                            | ACTUAL BODY
 	Total test failed:  2
 ```
 
-<Todo>Screenshot: the failing EXPECT / ACTUAL table in your terminal.</Todo>
+<Screenshot
+  src="/screenshots/regression-diff.png"
+  alt="Keploy failure table for test post-url-1: expected Content-Length 65 and body key url, actual Content-Length 71 and body key short_url."
+  caption="In the terminal, the changed key and Content-Length are colour-coded."
+  width={1323}
+  height={486}
+/>
+
+<Screenshot
+  src="/screenshots/regression-summary.png"
+  alt="Keploy test summary: 4 total tests, 2 passed, 2 failed, with failed test cases post-url-1 and post-url-2."
+  caption="The final summary names exactly which tests broke."
+  width={1348}
+  height={468}
+/>
 
 Both `POST` tests fail and both `GET` tests still pass, which is exactly the blast radius of the change. The noisy `ts` field doesn't even appear in the diff.
 

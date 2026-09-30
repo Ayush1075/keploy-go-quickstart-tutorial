@@ -5,7 +5,6 @@ import { Heading } from "@/components/mdx/heading";
 import { KeployFlow } from "@/components/mdx/keploy-flow";
 import { Screenshot } from "@/components/mdx/screenshot";
 import { Step, Steps } from "@/components/mdx/steps";
-import { Todo } from "@/components/mdx/todo";
 import { MobileTableOfContents } from "@/components/toc";
 import {
   Accordion,
@@ -40,7 +39,6 @@ const components = {
   Step,
   Screenshot,
   KeployFlow,
-  Todo,
   OnThisPage: MobileTableOfContents,
 
   // shadcn/ui primitives
