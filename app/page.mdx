@@ -1,0 +1,318 @@
+export const metadata = {
+  title: "Record, Replay, Relax: API Testing a Go App with Keploy",
+  description:
+    "A beginner-friendly walkthrough of Keploy's Gin + MongoDB quickstart: record real API traffic, turn it into tests and mocks, and catch regressions.",
+};
+
+<div className="not-prose mb-5 flex flex-wrap gap-2">
+  <Badge variant="secondary">Beginner</Badge>
+  <Badge variant="outline">Go · Gin</Badge>
+  <Badge variant="outline">MongoDB</Badge>
+  <Badge variant="outline">Linux / WSL</Badge>
+</div>
+
+# Record, Replay, Relax: API Testing a Go App with Keploy
+
+You have a Go API. It works. You *should* have tests for it, but writing them by hand means crafting request payloads, asserting on responses, and mocking out the database, which is often more code than the handlers themselves.
+
+In this tutorial you'll let **Keploy** write those tests for you. You'll run a small Gin + MongoDB app, use it like a normal user for a minute, and walk away with a replayable test suite that doesn't even need the database to run.
+
+<OnThisPage />
+
+<Callout type="info" title="What you'll learn">
+
+- What Keploy records, and why that's enough to build a test
+- How to turn real `curl` calls into test cases and MongoDB mocks
+- How to replay them with `keploy test` and read the results
+- What it looks like when Keploy catches a regression
+
+</Callout>
+
+<Todo>Add real time-to-complete once you've done the run (e.g. a "~20 min" badge above).</Todo>
+
+## What is Keploy?
+
+Keploy is an open-source testing tool that **generates API tests from real traffic**. Instead of writing a test, you *use* your API while Keploy watches. It saves two things:
+
+- **Test cases:** each request that hit your app, plus the response your app sent back.
+- **Mocks:** each call your app made to its dependencies (here, MongoDB) and what came back.
+
+Later, Keploy replays those requests against your app and answers the database calls itself using the saved mocks. If your app's response still matches what was recorded, the test passes. If something changed, you get a diff.
+
+<KeployFlow />
+
+### Why this is useful for a Go developer
+
+- **No test code to maintain.** Your handlers can change shape; you just re-record.
+- **No test database.** Mocks stand in for MongoDB, so tests are fast and don't depend on local state.
+- **No SDK or code changes.** Keploy works at the network level, so your `main.go` stays exactly as it is.
+- **Real-world inputs.** The tests use requests you actually sent, not ones you imagined while writing a test.
+
+<Todo>Add your own "a-ha" moment here in one or two sentences (the plan's §12 writing rules).</Todo>
+
+## Before you start
+
+Keploy captures traffic using Linux kernel features, so it runs on **Linux** or, on Windows, inside **WSL 2**. I did this whole tutorial from an Ubuntu shell in WSL on Windows 11.
+
+| Tool | Why you need it | Check it with |
+|---|---|---|
+| Linux or WSL 2 | Keploy needs a Linux kernel (5.10+) | `uname -r` |
+| Go | Builds and runs the sample app | `go version` |
+| Docker | Runs MongoDB in a container | `docker --version` |
+| Git | Clones the sample app | `git --version` |
+
+<Todo>Replace this line with the exact versions you used (Go, Docker, Keploy, kernel from `uname -r`).</Todo>
+
+<Callout type="warning" title="Windows users: stay inside WSL">
+
+Run every command in this tutorial from your WSL (Ubuntu) terminal, not PowerShell. Clone the repo into the Linux filesystem (e.g. `~/`), not under `/mnt/c/`, which is much slower to access from WSL.
+
+</Callout>
+
+## Meet the sample app
+
+The quickstart uses a tiny **URL shortener** from Keploy's [samples-go](https://github.com/keploy/samples-go/tree/main/gin-mongo) repository. It's a Gin HTTP server on port `8080` that stores URLs in MongoDB, with two endpoints:
+
+| Method | Path | What it does |
+|---|---|---|
+| `POST` | `/url` | Takes a long URL, stores it, returns a short code |
+| `GET` | `/:param` | Looks up a short code and redirects to the original URL |
+
+That MongoDB dependency is what makes this sample a good first choice: it lets you see Keploy's mocks in action, not just its HTTP recording.
+
+<Todo>Add 2–3 sentences on what you noticed reading `main.go` / `handler.go` (e.g. where the Mongo URL is set, what a handler returns).</Todo>
+
+## Set up and run the app
+
+<Steps>
+
+<Step title="Clone the sample">
+
+```bash
+git clone https://github.com/keploy/samples-go.git && cd samples-go/gin-mongo
+go mod download
+```
+
+**Why:** `go mod download` fetches the app's dependencies up front, so the first `keploy record` doesn't stall on downloads.
+
+</Step>
+
+<Step title="Point the app at your local MongoDB">
+
+The app's MongoDB address is set in `main.go`. For this local setup, change it to `localhost:27017`.
+
+<Todo>Paste the exact line before/after from `main.go` as a small `go` code block, and note the line number you found it on.</Todo>
+
+**Why:** the default value is the hostname used when the app itself runs inside Docker Compose. You'll run the app directly with `go run`, so it needs to reach MongoDB through `localhost`.
+
+</Step>
+
+<Step title="Start MongoDB">
+
+```bash
+docker compose up mongo
+```
+
+**Why:** only the database runs in Docker. The Go app runs on your machine, where Keploy can watch it.
+
+<Todo>Paste the trimmed log line that shows MongoDB is ready (text block).</Todo>
+
+</Step>
+
+<Step title="Sanity-check the app without Keploy">
+
+In a second terminal:
+
+```bash
+go run main.go handler.go
+```
+
+Then, in a third:
+
+```bash
+curl --request POST \
+  --url http://localhost:8080/url \
+  --header 'content-type: application/json' \
+  --data '{"url": "https://google.com"}'
+```
+
+**Why:** if something's broken at this point, it's not Keploy's fault. Confirming the app works on its own makes any later error much easier to place.
+
+<Todo>Paste the real JSON response you got (json block).</Todo>
+
+Stop the app with <kbd>Ctrl</kbd>+<kbd>C</kbd> once it responds. Keploy will start it for you in the next section. Leave MongoDB running.
+
+</Step>
+
+</Steps>
+
+## Install Keploy
+
+<Tabs defaultValue="script">
+  <TabsList>
+    <TabsTrigger value="script">Install script</TabsTrigger>
+    <TabsTrigger value="manual">Manual (Linux)</TabsTrigger>
+  </TabsList>
+  <TabsContent value="script">
+
+```bash
+curl --silent -O -L https://keploy.io/install.sh && source install.sh
+```
+
+  </TabsContent>
+  <TabsContent value="manual">
+
+```bash
+case "$(uname -m)" in
+  x86_64) ARCH=amd64 ;;
+  aarch64 | arm64) ARCH=arm64 ;;
+  *) echo "unsupported architecture: $(uname -m)" >&2; false ;;
+esac &&
+curl --fail --silent --show-error --location -o /tmp/keploy \
+  "https://keploy.io/ent/dl/latest/enterprise_linux_${ARCH}" &&
+sudo install -m 0755 /tmp/keploy /usr/local/bin/keploy
+```
+
+  </TabsContent>
+</Tabs>
+
+Check that it worked:
+
+```bash
+keploy --help
+```
+
+You should see the list of Keploy commands, including `record` and `test`.
+
+<Todo>Confirm which install method you used, delete the other tab if you only tested one, and paste your trimmed `keploy` version/help output.</Todo>
+
+## Record your first tests
+
+<Steps>
+
+<Step title="Start Keploy in record mode">
+
+```bash
+keploy record -c "go run main.go handler.go"
+```
+
+**Why:** `-c` is the command Keploy uses to start your app. Keploy launches it and hooks into its network traffic, so you don't touch the app's code.
+
+<Todo>Paste the trimmed startup output that shows Keploy is recording. Note whether you needed `sudo`.</Todo>
+
+</Step>
+
+<Step title="Use the app">
+
+With Keploy running, send some requests from another terminal. First, shorten a URL:
+
+```bash
+curl --request POST \
+  --url http://localhost:8080/url \
+  --header 'content-type: application/json' \
+  --data '{"url": "https://google.com"}'
+```
+
+Then follow the short link, using the code from **your** response:
+
+```bash
+curl --request GET --url http://localhost:8080/YOUR_SHORT_CODE
+```
+
+<Callout type="tip">
+
+Each request you send becomes one test case, so vary them: shorten a couple of different URLs and try a code that doesn't exist. More variety means better coverage.
+
+</Callout>
+
+<Todo>Paste your real responses and the Keploy log lines that show each capture.</Todo>
+
+</Step>
+
+<Step title="Stop recording">
+
+Press <kbd>Ctrl</kbd>+<kbd>C</kbd> in the Keploy terminal. Your tests are now saved to disk.
+
+</Step>
+
+</Steps>
+
+## Look at what Keploy generated
+
+Keploy writes everything to a `keploy/` folder in the project.
+
+<Todo>Paste the real folder tree (text block), then one trimmed test-case YAML and one trimmed mock YAML with a sentence explaining each key part.</Todo>
+
+<Callout type="info" title="Test cases vs. mocks">
+
+A **test case** is what your API received and returned. A **mock** is what your API asked MongoDB and what MongoDB answered. Replay needs both: the first to know what to send and expect, the second to fake the database.
+
+</Callout>
+
+## Replay the tests
+
+<Todo>Confirm the exact replay command for the local (non-Compose) setup. The quickstart page lists a Docker Compose command here; note what actually worked for you.</Todo>
+
+```bash
+keploy test -c "go run main.go handler.go" --delay 10
+```
+
+**Why `--delay`:** it tells Keploy how many seconds to wait for your app to boot before sending requests. If tests fail with connection errors, increase it.
+
+<Callout type="success" title="Checkpoint">
+
+You don't need MongoDB for this step. Try stopping the `mongo` container first. The tests should still pass, because every database response now comes from the mocks.
+
+</Callout>
+
+<Todo>Paste the trimmed test summary (total / passed / failed) and verify the "stop MongoDB" claim above on your machine. Remove it if it didn't hold.</Todo>
+
+## Break something on purpose
+
+Tests that always pass don't prove much. Let's make one fail.
+
+<Todo>Describe the exact change you made (e.g. renamed a JSON field in a handler response) as a small `go` block with highlighted lines, then paste the failing diff Keploy printed. Revert the change afterwards and re-run.</Todo>
+
+This is the payoff: you didn't write an assertion, yet Keploy noticed the response contract changed. In a real project this is the kind of change that sneaks through code review and breaks a client.
+
+## Troubleshooting
+
+<Accordion type="single" collapsible className="not-prose my-6 rounded-lg border px-4">
+  <AccordionItem value="port">
+    <AccordionTrigger>The app won't start: port 8080 already in use</AccordionTrigger>
+    <AccordionContent>
+      Another process (often a previous `go run` you forgot to stop) is holding the port. Find it with `lsof -i :8080`, stop it, and try again.
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="mongo">
+    <AccordionTrigger>The app can't connect to MongoDB</AccordionTrigger>
+    <AccordionContent>
+      Check the `mongo` container is running (`docker ps`) and that `main.go` points to `localhost:27017`, not the Docker Compose hostname.
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="delay">
+    <AccordionTrigger>Replay fails with connection errors</AccordionTrigger>
+    <AccordionContent>
+      Keploy started sending requests before the app was ready. Increase `--delay` (for example to 20) and run the tests again.
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
+
+<Todo>Add an "Issues I hit" group for anything that actually went wrong during your run, and verify or remove each common issue above.</Todo>
+
+## Where to go next
+
+- **Run it in CI.** Commit the `keploy/` folder and run `keploy test` in your pipeline, so every pull request is checked against real recorded traffic.
+- **Handle noisy fields.** Timestamps and generated IDs change on every run; Keploy lets you mark fields as noise so they're ignored during comparison.
+- **Try another sample.** The [Keploy quickstarts](https://keploy.io/docs/quickstart/samples-gin/) cover other Go frameworks and databases.
+
+<Todo>Verify the CI and noise claims against the Keploy docs and link the exact pages.</Todo>
+
+## Recap
+
+- Keploy turns **real API traffic** into test cases, and **dependency calls** into mocks.
+- `keploy record` captures; `keploy test` replays and compares.
+- Mocks mean replay doesn't need the real MongoDB.
+- A changed response shows up as a failing test with a diff, with no assertions written by hand.
+
+That's the loop: **record once, replay forever, re-record when the behaviour is meant to change.**
