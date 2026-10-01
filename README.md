@@ -128,36 +128,40 @@ Following the official quickstart closely surfaced a few things a first-time use
 ## 🧭 How Keploy works, in one picture
 
 ```mermaid
-flowchart LR
-  subgraph REC["keploy record"]
+flowchart TB
+  subgraph REC["① keploy record: use your API normally"]
     direction LR
-    C1["You (curl)"] -->|request| A1["Gin app"]
-    A1 -->|query| D1[("MongoDB")]
+    C1["You (curl)"] -->|request| A1["Gin app"] -->|query| D1[("MongoDB")]
   end
-  subgraph TEST["keploy test"]
+  subgraph FILES["Saved to keploy/test-set-0/"]
     direction LR
-    K1["Keploy replays<br/>recorded requests"] --> A2["Gin app<br/>(your current code)"]
-    A2 -->|query| K2["Keploy answers<br/>from mocks"]
-    A2 --> V{"Response matches<br/>the recording?"}
+    T[["tests/*.yaml<br/>request + response"]]
+    M[["mocks.yaml<br/>queries + results"]]
   end
-  A1 -. "request + response" .-> T[["tests/*.yaml"]]
-  D1 -. "queries + results" .-> M[["mocks.yaml"]]
-  T --> K1
-  M --> K2
+  subgraph TEST["② keploy test: no database needed"]
+    direction LR
+    K1["Keploy replays<br/>the requests"] --> A2["Gin app<br/>(your current code)"] -->|query| K2["Keploy answers<br/>from mocks"]
+  end
+  REC --> FILES --> TEST
+  TEST --> V{"Same response<br/>as recorded?"}
+  V -->|yes| PASS["✅ Test passes"]
+  V -->|no| FAIL["❌ Test fails, with a diff"]
 ```
 
 ## 🏗 How the site is built
 
 ```mermaid
-flowchart LR
-  MDX["app/page.mdx"] --> NMDX["@next/mdx"]
-  NMDX --> GFM["remark-gfm"] --> SLUG["rehype-slug"] --> SHIKI["rehype-pretty-code<br/>(Shiki)"]
-  MAP["mdx-components.tsx"] --> RSC
-  SHIKI --> RSC["React Server Components"]
-  OUT["lib/outline.ts<br/>reads page.mdx"] --> NAV["Sidebars + Ctrl K palette"]
-  RSC --> HTML["Static HTML"]
+flowchart TB
+  MDX["app/page.mdx<br/>the tutorial"]
+  MDX --> PIPE["@next/mdx<br/>remark-gfm · rehype-slug · rehype-pretty-code (Shiki)"]
+  MDX --> OUT["lib/outline.ts<br/>reads the headings and steps"]
+  MAP["mdx-components.tsx<br/>Steps, Callout, CodeBlock, …"] --> RSC
+  PIPE --> RSC["React Server Components"]
+  OUT --> NAV["Sidebars + Ctrl K palette"]
+  RSC --> HTML["Static HTML, built once by next build"]
   NAV --> HTML
-  HTML --> CDN["Vercel CDN"] --> BROWSER["Browser hydrates only<br/>the interactive pieces"]
+  HTML --> CDN["Served from Vercel's CDN"]
+  CDN --> BROWSER["Browser hydrates only the interactive pieces"]
 ```
 
 - **Content is MDX.** The tutorial is one file, [`app/page.mdx`](app/page.mdx): Markdown for prose, React components where they help (`<Steps>`, `<Callout>`, `<KeployFlow>`, `<Term>`).
